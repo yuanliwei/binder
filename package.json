@@ -1,8 +1,11 @@
 {
-  "name": "binder",
+  "name": "@yuanliwei/binder",
   "version": "1.0.0",
   "description": "A simple DOM data binding tool that can be used to bind data or events to DOM elements.",
   "main": "index.js",
+  "devDependencies": {
+    "http-server": "^0.12.0"
+  },
   "scripts": {
     "test": "npx http-server -c-1 -o /test.html"
   },
@@ -10,9 +13,14 @@
     "bind",
     "dom"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuanliwei/binder.git"
+  },
   "author": "yuanliwei",
-  "license": "ISC",
-  "devDependencies": {
-    "http-server": "^0.12.0"
-  }
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yuanliwei/binder/issues"
+  },
+  "homepage": "https://github.com/yuanliwei/binder#readme"
 }
