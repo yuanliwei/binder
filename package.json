@@ -1,0 +1,18 @@
+{
+  "name": "binder",
+  "version": "1.0.0",
+  "description": "A simple DOM data binding tool that can be used to bind data or events to DOM elements.",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx http-server -c-1 -o /test.html"
+  },
+  "keywords": [
+    "bind",
+    "dom"
+  ],
+  "author": "yuanliwei",
+  "license": "ISC",
+  "devDependencies": {
+    "http-server": "^0.12.0"
+  }
+}

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>test-bind</title>
+    <style>
+        div.output {
+            margin: 5px;
+            padding: 1em;
+            font: outline;
+            font-size: large;
+            border-radius: 7px;
+        }
+
+        .background-red {
+            background-color: red;
+        }
+
+        .background-green {
+            background-color: green;
+        }
+
+        pre {
+            background: aliceblue;
+            font-size: 1.2em;
+        }
+
+        .pointer {
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 代码模板 -->
+    <template id="templ-code">
+        <hr>
+        <h1>{{title}}</h1>
+        <p>{{desc}}</p><code><pre>    {{template}}</pre></code>
+            <code><pre>        {{code}}</pre></code>
+    </template>
+    <!-- 单个模板 -->
+    <template id="templ-single">
+        <div id="{{id}}" class="output background-{{color}} {{pointer}}">
+            {{name}} : {{value}} ------ {{name}} : {{value}}
+        </div>
+    </template>
+    <!-- 嵌套的模板 -->
+    <template id="templ-nested">
+        <div class="{{color}}">
+            <h1>{{title}}</h1>
+            <div>
+                <!-- 嵌套的模板需要添加一个唯一的父元素，否则会渲染出来的元素顺序会跟预期不一致 -->
+                <template name="list">
+                    <div id="{{id}}" class="output background-{{color}}">
+                        {{name}} : {{value}} ------ {{name}} : {{value}}
+                    </div>
+                </template>
+            </div>
+            <h2>{{title2}}</h2>
+            <div>
+                <template name="item">
+                    <div id="{{id}}" class="output background-{{color}}">
+                        {{name}} : {{value}} ------ {{name}} : {{value}}
+                    </div>
+                </template>
+            </div>
+            <h3>{{title3}}</h3>
+            <p>RENDER HTML : {{#html}}</p>
+        </div>
+    </template>
+</body>
+<script type="module">
+    import Binder from "./index.js"
+    new class App {
+        constructor() {
+            this.b = new Binder()
+            this.renderCode('templ-code', this.renderCode, '渲染代码块，页面布局需要，后面的才是示例')
+
+            this.renderCode('templ-single', this.testBindValue, '绑定对象属性值到对应的 dom 上面')
+            this.testBindValue()
+
+            this.renderCode('templ-single', this.testRenderTempl, '直接渲染指定的模板')
+            this.testRenderTempl()
+
+            this.renderCode('templ-single', this.testRenderClickAction, '渲染模板时绑定点击事件')
+            this.testRenderClickAction()
+
+            this.renderCode('templ-single', this.testReBindValue, '每次点击的时候重新绑定对象属性值')
+            this.testReBindValue()
+
+            this.renderCode('templ-single', this.testRenderLoop, '使用指定的模板渲染列表')
+            this.testRenderLoop()
+
+            this.renderCode('templ-nested', this.testRenderNested, '渲染嵌套的模板')
+            this.testRenderNested()
+        }
+        renderCode(template, code, desc) {
+            let { b } = this
+            let templ = document.getElementById('templ-code')
+            let templCode = document.getElementById(template).outerHTML
+            b.render(templ, { title: code.name, template: templCode, code: code.toString(), desc: desc })
+        }
+        testBindValue() {
+            let { b } = this
+            let templ = document.getElementById('templ-single')
+            let contailner = templ.parentElement
+            let node = templ.content.cloneNode(true).querySelector('div')
+            contailner.appendChild(node)
+
+            b.bind(node, {
+                color: 'red',
+                name: 'red',
+                value: 13,
+            })
+        }
+        testRenderTempl() {
+            let { b } = this
+            let templ = document.getElementById('templ-single')
+
+            b.render(templ, {
+                code: this.testRenderTempl.toString(),
+                color: 'green',
+                name: 'green',
+                value: 13
+            })
+        }
+        testRenderClickAction() {
+            let { b } = this
+            let templ = document.getElementById('templ-single')
+
+            b.render(templ, {
+                color: 'green',
+                pointer: 'pointer',
+                name: 'testRenderClickAction',
+                value: 13,
+                id: 'alert',
+                '#alert@onclick': (e) => {
+                    alert(e.target.outerHTML)
+                }
+            })
+        }
+        testReBindValue() {
+            let { b } = this
+            let node = document.getElementById('rebind')
+            if (!node) {
+                let templ = document.getElementById('templ-single')
+                let contailner = templ.parentElement
+                node = templ.content.cloneNode(true).querySelector('div')
+                contailner.appendChild(node)
+            }
+
+            b.bind(node, {
+                color: 'green',
+                name: 'red',
+                pointer: 'pointer',
+                value: new Date().toLocaleString(),
+                id: 'rebind',
+                '#rebind@onclick': (e) => {
+                    this.testReBindValue()
+                }
+            })
+        }
+        testRenderLoop() {
+            let { b } = this
+            let templ = document.getElementById('templ-single')
+            // 准备数据
+            let arr = []
+            for (let index = 0; index < 5; index++) {
+                arr.push({
+                    color: (index % 2) ? 'green' : 'red',
+                    name: 'testRenderLoop',
+                    value: index
+                })
+            }
+
+            b.render(templ, arr)
+        }
+        testRenderNested() {
+            let { b } = this
+            let templ = document.getElementById('templ-nested')
+            // 准备数据
+            let arr = []
+            for (let index = 0; index < 4; index++) {
+                arr.push({
+                    color: (index % 2) ? 'green' : 'red',
+                    name: 'testRenderLoop',
+                    value: index,
+                })
+            }
+            let obj = {
+                code: this.testRenderNested.toString(),
+                title: 'Nested Test Title H1',
+                title2: 'Nested Test Title H2',
+                title3: 'Nested Test Title H3',
+                color: 'green',
+                list: arr,
+                item: arr[3],
+                html: `nobis <em>reprehenderit</em> sint <sup>veritatis</sup> 
+                       eaque earum recusandae <span style="color: red;">dolorem 
+                       iure,</span> optio perferendis quidem?`
+            }
+
+            console.time('render')
+            b.render(templ, obj)
+            console.timeEnd('render')
+        }
+    }
+</script>
+
+</html>
