@@ -4,10 +4,10 @@
   "description": "A simple DOM data binding tool that can be used to bind data or events to DOM elements.",
   "main": "index.js",
   "devDependencies": {
-    "http-server": "^0.12.0"
+    "sirv-cli": "^0.4.5"
   },
   "scripts": {
-    "test": "npx http-server -c-1 -o /test.html"
+    "test": "sirv ."
   },
   "keywords": [
     "bind",
